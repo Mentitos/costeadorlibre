@@ -1,3 +1,6 @@
+import 'material_model.dart';
+import 'product_model.dart';
+
 class DatabaseModel {
   List<MaterialModel> materials;
   List<ProductModel> products;

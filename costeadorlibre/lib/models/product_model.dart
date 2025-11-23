@@ -1,3 +1,5 @@
+import 'product_ingredient.dart';
+
 class ProductModel {
   final String id;
   String name;

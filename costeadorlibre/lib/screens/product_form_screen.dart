@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/product_model.dart';
+import '../models/product_ingredient.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final ProductModel? product;
@@ -302,8 +303,8 @@ class _IngredientDialogState extends State<_IngredientDialog> {
               labelText: 'Insumo',
               border: OutlineInputBorder(),
             ),
-            items: widget.materials.map((material) {
-              return DropdownMenuItem(
+            items: widget.materials.map<DropdownMenuItem<String>>((material) {
+              return DropdownMenuItem<String>(
                 value: material.id,
                 child: Text(material.name),
               );
