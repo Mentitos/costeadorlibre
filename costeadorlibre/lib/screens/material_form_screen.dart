@@ -1,12 +1,15 @@
+// lib/screens/material_form_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/material_model.dart';
+import '../models/unit_system.dart';
 
 class MaterialFormScreen extends StatefulWidget {
   final MaterialModel? material;
-  
+
   const MaterialFormScreen({super.key, this.material});
 
   @override
@@ -18,8 +21,8 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _costController;
   late TextEditingController _quantityController;
-  late TextEditingController _unitController;
-  
+  late MeasurementUnit _selectedUnit; // :3 Ahora es un enum
+
   bool get isEditing => widget.material != null;
 
   @override
@@ -32,7 +35,7 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
     _quantityController = TextEditingController(
       text: widget.material?.purchaseQuantity.toString() ?? '',
     );
-    _unitController = TextEditingController(text: widget.material?.unit ?? '');
+    _selectedUnit = widget.material?.unit ?? MeasurementUnit.units;
   }
 
   @override
@@ -40,28 +43,28 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
     _nameController.dispose();
     _costController.dispose();
     _quantityController.dispose();
-    _unitController.dispose();
     super.dispose();
   }
 
   Future<void> _saveMaterial() async {
     if (_formKey.currentState!.validate()) {
       final provider = context.read<AppProvider>();
-      
+
       final material = MaterialModel(
-        id: widget.material?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.material?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         purchaseCost: double.parse(_costController.text),
         purchaseQuantity: double.parse(_quantityController.text),
-        unit: _unitController.text.trim(),
+        unit: _selectedUnit,
       );
-      
+
       if (isEditing) {
         await provider.updateMaterial(material);
       } else {
         await provider.addMaterial(material);
       }
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +111,8 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.attach_money),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -135,9 +139,11 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.straighten),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,3}')),
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,3}')),
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -151,19 +157,25 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
+                // :3 NUEVO: Dropdown para seleccionar unidad
                 Expanded(
-                  child: TextFormField(
-                    controller: _unitController,
+                  flex: 2,
+                  child: DropdownButtonFormField<MeasurementUnit>(
+                    value: _selectedUnit,
                     decoration: const InputDecoration(
                       labelText: 'Unidad',
-                      hintText: 'kg',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Unidad';
-                      }
-                      return null;
+                    items: MeasurementUnit.values.map((unit) {
+                      return DropdownMenuItem(
+                        value: unit,
+                        child: Text('${unit.displayName} (${unit.symbol})'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedUnit = value!;
+                      });
                     },
                   ),
                 ),
@@ -185,7 +197,7 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Ejemplo',
+                          'Ejemplos',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -194,19 +206,14 @@ class _MaterialFormScreenState extends State<MaterialFormScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Si compré 1kg de harina por \$1000:'),
+                    const Text('• Compré 1kg de harina por \$1000'),
+                    const Text('  Costo: 1000, Cantidad: 1, Unidad: kg'),
                     const SizedBox(height: 8),
-                    const Text('• Costo de compra: 1000'),
-                    const Text('• Cantidad: 1'),
-                    const Text('• Unidad: kg'),
+                    const Text('• Compré 40 bolsas por \$2000'),
+                    const Text('  Costo: 2000, Cantidad: 40, Unidad: Unidades'),
                     const SizedBox(height: 8),
-                    Text(
-                      'Costo por kg: \$1000',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+                    const Text('• Compré 500ml de leche por \$500'),
+                    const Text('  Costo: 500, Cantidad: 500, Unidad: ml'),
                   ],
                 ),
               ),

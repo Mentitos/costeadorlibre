@@ -1,8 +1,11 @@
+// lib/screens/materials_screen.dart
+// REEMPLAZA TODO EL ARCHIVO CON ESTE CÓDIGO
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/app_provider.dart';
-
+import '../models/material_model.dart';
 import 'material_form_screen.dart';
 
 class MaterialsScreen extends StatelessWidget {
@@ -10,8 +13,9 @@ class MaterialsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-    
+    final currencyFormat =
+        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Insumos'),
@@ -33,21 +37,21 @@ class MaterialsScreen extends StatelessWidget {
                   Text(
                     'No hay insumos registrados',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                          color: Colors.grey[600],
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Presiona + para agregar uno',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[500],
-                    ),
+                          color: Colors.grey[500],
+                        ),
                   ),
                 ],
               ),
             );
           }
-          
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: provider.materials.length,
@@ -58,7 +62,8 @@ class MaterialsScreen extends StatelessWidget {
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
                   leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
                     child: Icon(
                       Icons.inventory_2,
                       color: Theme.of(context).colorScheme.primary,
@@ -72,10 +77,11 @@ class MaterialsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 8),
-                      Text('Compra: ${currencyFormat.format(material.purchaseCost)} por ${material.purchaseQuantity} ${material.unit}'),
+                      Text(
+                          'Compra: ${currencyFormat.format(material.purchaseCost)} por ${material.purchaseQuantity} ${material.unit.symbol}'),
                       const SizedBox(height: 4),
                       Text(
-                        'Costo unitario: ${currencyFormat.format(material.costPerUnit)}/${material.unit}',
+                        'Costo: ${currencyFormat.format(material.costPerPurchaseUnit)}/${material.unit.symbol}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w500,
@@ -101,7 +107,8 @@ class MaterialsScreen extends StatelessWidget {
                           children: [
                             Icon(Icons.delete, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Eliminar', style: TextStyle(color: Colors.red)),
+                            Text('Eliminar',
+                                style: TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -111,7 +118,8 @@ class MaterialsScreen extends StatelessWidget {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => MaterialFormScreen(material: material),
+                            builder: (_) =>
+                                MaterialFormScreen(material: material),
                           ),
                         );
                       } else if (value == 'delete') {
@@ -136,7 +144,8 @@ class MaterialsScreen extends StatelessWidget {
                           await provider.deleteMaterial(material.id);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Insumo eliminado')),
+                              const SnackBar(
+                                  content: Text('Insumo eliminado')),
                             );
                           }
                         }
